@@ -85,7 +85,7 @@ public class UserApiControllerTest {
     }
 
     @Test
-    public void testUpdate_shouldNotImplemented() throws Exception {
+    public void testUpdate_shouldNotImplemented() throws Exception {}
         mockMvc.perform(
                 patch("/user-java/2")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -93,7 +93,7 @@ public class UserApiControllerTest {
                         .content(convertObjectToJsonBytes(profile))
         )
                 .andExpect(MockMvcResultMatchers.status().is5xxServerError());
-    }
+    
 
     @Test
     public void testUpdate() throws Exception {
