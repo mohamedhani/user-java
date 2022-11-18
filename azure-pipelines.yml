@@ -1,0 +1,119 @@
+trigger:
+  branches:
+    include:
+    - feature/*
+    - master
+  
+pr:
+  branches:
+    include:
+    - feature/*
+    
+variables:
+- name: APP_NAME
+  value:  user-java
+- name: BASE_PATH
+  value: "."
+- group: JFROG_CRED
+- group: DOCKER_HUB
+  
+
+pool:
+  name: "Azure Pipelines"
+  vmImage: ubuntu-latest
+
+resources:
+  repositories:
+    - repository: helm-draft-pack
+      name: helm-draft-pack
+      type: git
+
+jobs:
+
+- job: BuildingArtifact
+  steps:
+  - task: SonarCloudPrepare@1
+    inputs:
+      SonarCloud: 'sonar-cloud-connection'
+      organization: 'mohamedhani1449'
+      scannerMode: 'Other'
+      extraProperties: |
+        sonar.projectKey=mohamedHANI1449_$(APP_NAME)
+        sonar.projectName=$(APP_NAME)
+  - task: Maven@3
+    inputs:
+      mavenPomFile: '$(BASE_PATH)/pom.xml'
+      goals: 'clean install'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
+      javaHomeOption: 'JDKVersion'
+      mavenVersionOption: 'Default'
+      mavenAuthenticateFeed: false
+      effectivePomSkip: false
+      sonarQubeRunAnalysis: true
+      sqMavenPluginVersionChoice: 'latest'
+    displayName: Build Maven
+
+  - task: SonarCloudPublish@1
+    inputs:
+      pollingTimeoutSec: '300'
+
+- job: Containerization
+  dependsOn: BuildingArtifact
+  condition:  and(succeeded() , ne(variables['Build.Reason'],'PullRequest'))
+  steps:
+  - bash: |
+      BRANCH_TYPE=`echo $(Build.SourceBranch) | cut -f 3 -d "/"`
+      if [ $BRANCH_TYPE == "master" ]
+      then 
+         TAG=$(Build.BuildId)
+      elif [[ $BRANCH_TYPE == "feature" || $BRANCH_TYPE == "hotfix" ]]
+      then
+        TAG='$(Build.BuildId)-$(Build.SourceBranchName)'
+      fi
+      echo "##vso[task.setvariable variable=Tag;]$TAG"
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'DockerHub'
+      repository: 'mohamedhani/$(APP_NAME)'
+      command: 'buildAndPush'
+      Dockerfile: '$(BASE_PATH)/Dockerfile'
+      buildContext: '$(BASE_PATH)'
+      tags: '$(Tag)'
+      
+- job: Charting
+  dependsOn: BuildingArtifact
+  condition: and(succeeded() , ne(variables['Build.Reason'],'PullRequest'))
+  container:
+    image:  mohamedhani/base-image
+    endpoint: 'DockerHub'
+
+
+  steps:
+  - checkout: helm-draft-pack
+  - script: |
+      ls
+      BRANCH_TYPE=`echo $(Build.SourceBranch) | cut -f 3 -d "/"`
+      if [ $BRANCH_TYPE == "master" ]
+      then 
+         TAG=$(Build.BuildId)
+      elif [[ $BRANCH_TYPE == "feature" || $BRANCH_TYPE == "hotfix" ]]
+      then
+        TAG='$(Build.BuildId)-$(Build.SourceBranchName)'
+      fi
+      echo $TAG
+      echo "##vso[task.setvariable variable=Tag;]$TAG"
+
+  - script: |
+      HELM_VERSION="1.0.$(Tag)"
+      find ./* -type f  -exec sed -i "s/APP_NAME/$(APP_NAME)/g" {} \;
+      yq e -i '.repository.image = "mohamedhani/$(APP_NAME):$(Tag)"' ./values.yaml
+      yq e -i '.name = "$(APP_NAME)"' ./Chart.yaml
+      yq e -i '.version= "'$HELM_VERSION'"' ./Chart.yaml
+      yq e -i '.docker.username' ="$(DOCKER_USERNAME)" ./values.yaml
+      yq e -i '.docker.password' ="$(DOCKER_PASSWORD)" ./values.yaml
+      yq e -i '.docker.server' ="$(DOCKER_SERVER)" ./values.yaml
+      helm package .
+      curl -u $(JFROG_USERNAME):$(JFRPG_PASSWORD)  -T $(APP_NAME)-$HELM_VERSION.tgz $(JFROG_SERVER)/services-helm/$(APP_NAME)-$HELM_VERSION.tgz
+
+
