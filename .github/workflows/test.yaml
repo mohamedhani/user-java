@@ -1,0 +1,29 @@
+name: test
+run-name: test ${{ github.actor }}
+on:
+    push:
+        branches:
+        - feature/**
+    pull_request:
+        branches:
+            - feature/**  
+jobs:
+    unit-test:
+        name: Unit Test
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        - name: Setup JDK
+          uses: actions/setup-java@v3
+          with:
+            distribution: 'corretto' # See 'Supported distributions' for available options
+            java-version: '16'
+        - name: Setup Maven Action
+          uses: s4u/setup-maven-action@< version >
+          with:
+            java-version: 17
+            maven-version: '3.8.8'
+        - name: Run Tests
+          run : mvn test
+
+
