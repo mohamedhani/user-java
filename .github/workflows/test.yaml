@@ -3,10 +3,10 @@ run-name: test ${{ github.actor }}
 on:
     push:
         branches:
-        - feature/**
+        - main
     pull_request:
         branches:
-            - main 
+            - master 
 jobs:
     unit-test:
         name: Unit Test
