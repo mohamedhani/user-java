@@ -44,7 +44,32 @@ jobs:
                 ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
                 ${{ runner.os }}-maven-
                 ${{ runner.os }}
-
-
-
-                
+    sonarqube-test:
+        name:  SonarQube Test
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        - name: Setup JDK
+          uses: actions/setup-java@v3
+          with:
+            distribution: 'corretto' # See 'Supported distributions' for available options
+            java-version: '16'
+        - uses: actions/cache@v3
+          with:
+            path: ~/.sonar/cache
+            key: ${{ runner.os }}-sonar
+            restore-keys: ${{ runner.os }}-sonar
+        - name: Cache local Maven repository
+          uses: actions/cache@v3
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+                ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                ${{ runner.os }}-maven-
+                ${{ runner.os }}
+        - name: Build and analyze
+          env:
+      #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
