@@ -19,10 +19,9 @@ jobs:
             distribution: 'corretto' # See 'Supported distributions' for available options
             java-version: '16'
         - name: Setup Maven Action
-          uses: s4u/setup-maven-action@< version >
+          uses: stCarolas/setup-maven@v4.5
           with:
-            java-version: 17
-            maven-version: '3.8.8'
+            maven-version: 3.8.2
         - name: Run Tests
           run : mvn test
 
