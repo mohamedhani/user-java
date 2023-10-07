@@ -3,10 +3,10 @@ run-name: test ${{ github.actor }}
 on:
     push:
         branches:
-        - master
+        - feature/**
     pull_request:
         branches:
-            - master 
+        - master 
 jobs:
     unit-test:
         name: Unit Test
@@ -34,16 +34,6 @@ jobs:
                 ${{ runner.os }}
         - name: Run Tests
           run : mvn test
-        - name: Cache local Maven repository
-          if: steps.restore-cache.outputs.cache-hit == false
-          uses: actions/cache@v3
-          with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-            restore-keys: |
-                ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-                ${{ runner.os }}-maven-
-                ${{ runner.os }}
     sonarqube-test:
         name:  SonarQube Test
         runs-on: ubuntu-latest
@@ -69,7 +59,7 @@ jobs:
                 ${{ runner.os }}-maven-
                 ${{ runner.os }}
         - name: Build and analyze
-          env:
+          env: 
       #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
