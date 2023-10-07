@@ -22,7 +22,27 @@ jobs:
           uses: stCarolas/setup-maven@v4.5
           with:
             maven-version: 3.8.2
+        - name: Restore local Maven repository
+          uses: actions/cache@v3
+          id: restore-cache
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+                ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                ${{ runner.os }}-maven-
+                ${{ runner.os }}
         - name: Run Tests
           run : mvn test
+        - name: Cache local Maven repository
+          if: steps.restore-cache.outputs.cache-hit == false
+          uses: actions/cache@v3
+          with:
+            path: ~/.m2/repository
+            key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+            restore-keys: |
+                ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+                ${{ runner.os }}-maven-
+                ${{ runner.os }}
 
 
