@@ -86,6 +86,7 @@ jobs:
         env:
           PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
     
+          
       - run :  cat /etc/hosts
       - run: dig sonarqube.home.local
       # - name: Build and analyze
