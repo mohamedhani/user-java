@@ -8,57 +8,57 @@ on:
         branches:
         - master 
 jobs:
-    build:
-      name: JDK Builing
-      runs-on: ubuntu-latest  
-      steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto' # See 'Supported distributions' for available options
-          java-version: '16'
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-              ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-              ${{ runner.os }}-maven-
-              ${{ runner.os }}
-      - name: Building 
-        run : mvn clean install
+    # build:
+    #   name: JDK Builing
+    #   runs-on: ubuntu-latest  
+    #   steps:
+    #   - uses: actions/checkout@v4
+    #   - uses: actions/setup-java@v3
+    #     with:
+    #       distribution: 'corretto' # See 'Supported distributions' for available options
+    #       java-version: '16'
+    #   - name: Cache local Maven repository
+    #     uses: actions/cache@v3
+    #     with:
+    #       path: ~/.m2/repository
+    #       key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    #       restore-keys: |
+    #           ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    #           ${{ runner.os }}-maven-
+    #           ${{ runner.os }}
+    #   - name: Building 
+    #     run : mvn clean install
     
-    unit-test:
-      needs:
-      -  build
-      name: Unit Test
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v4
-      - name: Setup JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'corretto' # See 'Supported distributions' for available options
-          java-version: '16'
-      - name: Setup Maven Action
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.8.2
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-              ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-              ${{ runner.os }}-maven-
-              ${{ runner.os }}
-      - name: Run Tests
-        run : mvn test
+    # unit-test:
+    #   needs:
+    #   -  build
+    #   name: Unit Test
+    #   runs-on: ubuntu-latest
+    #   steps:
+    #   - uses: actions/checkout@v4
+    #   - name: Setup JDK
+    #     uses: actions/setup-java@v3
+    #     with:
+    #       distribution: 'corretto' # See 'Supported distributions' for available options
+    #       java-version: '16'
+    #   - name: Setup Maven Action
+    #     uses: stCarolas/setup-maven@v4.5
+    #     with:
+    #       maven-version: 3.8.2
+    #   - name: Cache local Maven repository
+    #     uses: actions/cache@v3
+    #     with:
+    #       path: ~/.m2/repository
+    #       key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    #       restore-keys: |
+    #           ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+    #           ${{ runner.os }}-maven-
+    #           ${{ runner.os }}
+    #   - name: Run Tests
+    #     run : mvn test
     sonarqube-test:
-      needs:
-      -  build
+      # needs:
+      # -  build
       name:  SonarQube Test
       runs-on: ubuntu-latest
       steps:
@@ -82,8 +82,10 @@ jobs:
               ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
               ${{ runner.os }}-maven-
               ${{ runner.os }}
+      - run: sudo bash -c 'echo "${{ secrets.PUBLIC_IP }} sonarqube.home.local"> /etc/hosts'
+      - run: sudo cat /etc/hosts
       - name: Build and analyze
-        env: 
-    #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
+          SONAR_HOST_URL: https://sonarqube.home.local:8443
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=user-java -Dsonar.projectName='user-java'
