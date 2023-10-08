@@ -27,7 +27,7 @@ jobs:
               ${{ runner.os }}-maven-
               ${{ runner.os }}
       - name: Building 
-        run : mvn clean build
+        run : mvn clean install
     
     unit-test:
       needs:
