@@ -82,7 +82,9 @@ jobs:
       #         ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
       #         ${{ runner.os }}-maven-
       #         ${{ runner.os }}
-      - run: sudo bash -c "echo ${{ env.PUBLIC_IP }} sonarqube.home.local >>  /etc/hosts"
+      - run: sudo bash -c "echo $PUBLIC_IP sonarqube.home.local >>  /etc/hosts"
+        env:
+          PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
     
       - run :  cat /etc/hosts
       - run: dig sonarqube.home.local
