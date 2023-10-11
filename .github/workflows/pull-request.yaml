@@ -2,8 +2,13 @@ name: test
 run-name: test ${{ github.actor }}
 on:
     push:
-        branches:
-        - develop
+      branches:
+        - master
+    pull_request:
+      types: 
+       - opened
+       - synchronize
+       - reopened
 jobs:
     build:
       name: JDK Builing
@@ -25,11 +30,10 @@ jobs:
               ${{ runner.os }}
       - name: Building 
         run : mvn clean install
-    
-    unit-test:
+    sonarqube-test:
+      name:  SonarQube Test
       needs:
       -  build
-      name: Unit Test
       runs-on: ubuntu-latest
       steps:
       - uses: actions/checkout@v4
@@ -38,10 +42,11 @@ jobs:
         with:
           distribution: 'corretto' # See 'Supported distributions' for available options
           java-version: '16'
-      - name: Setup Maven Action
-        uses: stCarolas/setup-maven@v4.5
+      - uses: actions/cache@v3
         with:
-          maven-version: 3.8.2
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
@@ -51,5 +56,10 @@ jobs:
               ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
               ${{ runner.os }}-maven-
               ${{ runner.os }}
-      - name: Run Tests
-        run : mvn test
+
+        env:
+            PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
