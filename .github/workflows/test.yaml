@@ -83,7 +83,7 @@ jobs:
               ${{ runner.os }}-maven-
               ${{ runner.os }}
       - run: |
-           echo "154.177.236.64 sonarqube.home.local" | sudo tee -a /etc/hosts
+           echo "154.177.236.64 sonarqube.home.local" | sudo tee  /etc/hosts
            sudo cat /etc/hosts
            dig sonarqube.home.local
            dig localhost
