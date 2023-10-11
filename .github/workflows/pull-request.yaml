@@ -4,11 +4,6 @@ on:
     push:
       branches:
         - master
-    pull_request:
-      types: 
-       - opened
-       - synchronize
-       - reopened
 jobs:
     build:
       name: JDK Builing
@@ -59,7 +54,20 @@ jobs:
 
         env:
             PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
-      - name: Build and analyze
+    #   - name: Build and analyze
+    #     env:
+    #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    #     run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    # Check the Quality Gate status.
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+      # Force to fail step after specific time.
+        timeout-minutes: 5
+        env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
