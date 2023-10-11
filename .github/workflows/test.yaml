@@ -82,11 +82,15 @@ jobs:
               ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
               ${{ runner.os }}-maven-
               ${{ runner.os }}
-      - run: sudo bash -c "echo $PUBLIC_IP sonarqube.home.local >>  /etc/hosts"
+      - run: |
+           echo "154.177.236.64 sonarqube.home.local" | sudo tee -a /etc/hosts
+           sudo cat /etc/hosts
+           dig sonarqube.home.local
+           dig localhost
         env:
           PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarqube.home.local:8443
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=user-java -Dsonar.projectName='user-java'
+      # - name: Build and analyze
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: https://sonarqube.home.local:8443
+      #   run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=user-java -Dsonar.projectName='user-java'
