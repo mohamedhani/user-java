@@ -99,7 +99,7 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@master
         env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+            SONAR_HOST_URL:  https://sonarcloud.io
     # Check the Quality Gate status.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
@@ -107,4 +107,5 @@ jobs:
       # Force to fail step after specific time.
         timeout-minutes: 5
         env:
-         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL:  https://sonarcloud.io
