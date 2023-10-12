@@ -1,16 +1,9 @@
-name: test
-run-name: test ${{ github.actor }}
+name: Building
+run-name: ${{ github.actor }}
 on:
     push:
         branches:
         - develop
-    pull_request:
-      branches:
-      - master
-      types: 
-      - opened
-      - synchronize
-      - reopened
 jobs:
     build:
       name: JDK Builing
@@ -88,11 +81,5 @@ jobs:
               ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
               ${{ runner.os }}-maven-
               ${{ runner.os }}
-
         env:
             PUBLIC_IP: ${{ vars.PUBLIC_IP }} 
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=home-testing-user-java  -Dsonar.qualitygate.wait=true
-        
