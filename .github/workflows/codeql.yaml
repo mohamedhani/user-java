@@ -1,5 +1,5 @@
-name: SonarQube Testing
-run-name: ${{ github.actor }}
+name: Static Testing
+run-name: CodeQL for ${{ github.actor }}
 on:
   push:
     branches:
