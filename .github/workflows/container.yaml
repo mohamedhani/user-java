@@ -25,6 +25,8 @@ jobs:
     docker-build-only:
       name: Building Docker Image
       runs-on: ubuntu-latest
+      needs:
+        - env-tag
       if: github.event_name == 'pull_request'
       steps:
       - uses: actions/checkout@v4
@@ -52,6 +54,8 @@ jobs:
     docker-build:
       name: Building Docker Image
       runs-on: ubuntu-latest
+      needs:
+      - env-tag
       if: github.event_name == 'push'
       steps:
       - uses: actions/checkout@v4
