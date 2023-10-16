@@ -1,5 +1,6 @@
 # First stage to build the application
 FROM maven:3.5.4-jdk-10 AS build-env
+COPY ./.m2/repository ~/.m2/repository
 ADD ./pom.xml pom.xml
 ADD ./src src/
 RUN mvn clean package

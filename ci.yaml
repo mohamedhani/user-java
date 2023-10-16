@@ -2,8 +2,15 @@ name: Building
 run-name: ${{ github.actor }}
 on:
     push:
-        branches:
-        - develop
+      branches:
+      - develop
+      - master
+    pull_request:
+        # Sequence of patterns matched against refs/heads
+      branches:    
+      - master
+
+        
 jobs:
     build:
       name: JDK Builing

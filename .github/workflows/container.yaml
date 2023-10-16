@@ -1,0 +1,82 @@
+name: packaging
+run-name: ${{ github.actor }}
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+      # Sequence of patterns matched against refs/heads
+    branches:    
+    - master
+jobs:
+    
+    env-tag:
+      name: JDK Builing
+      runs-on: ubuntu-latest  
+      outputs:
+        imageTag: ${{ steps.env-tag.outputs.tag }}
+      steps:
+      - uses: actions/checkout@v4
+
+      - name: Set ENV Tag
+        id: env-tag
+        run: |
+          echo "tag=${git log -1 --pretty=format:%H | cut -c -9}"  >> "$GITHUB_OUTPUT"
+    docker-build-only:
+      name: Building Docker Image
+      runs-on: ubuntu-latest
+      if: github.event_name == 'pull_request'
+      steps:
+      - uses: actions/checkout@v4
+      - name: Cache local Maven repository
+  
+        uses: actions/cache@v3
+        with:
+          path: ./.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+              ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+              ${{ runner.os }}-maven-
+              ${{ runner.os }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: false
+          tags: mohamedhani/user-java:${{ needs.env-tag.outputs.tag }}
+        
+
+    docker-build:
+      name: Building Docker Image
+      runs-on: ubuntu-latest
+      if: github.event_name == 'push'
+      steps:
+      - uses: actions/checkout@v4
+      - name: Cache local Maven repository
+  
+        uses: actions/cache@v3
+        with:
+          path: ./.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+              ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+              ${{ runner.os }}-maven-
+              ${{ runner.os }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: mohamedhani/user-java:${{ needs.env-tag.outputs.tag }}
