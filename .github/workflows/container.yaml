@@ -11,7 +11,7 @@ on:
 jobs:
     
     env-tag:
-      name: JDK Builing
+      name: Get Docker Image Tag
       runs-on: ubuntu-latest  
       outputs:
         imageTag: ${{ steps.env-tag.outputs.tag }}
@@ -21,7 +21,9 @@ jobs:
       - name: Set ENV Tag
         id: env-tag
         run: |
-          echo "tag=`git log -1 --pretty=format:%H | cut -c -9`"  >> "$GITHUB_OUTPUT"
+          TAG=`git log -1 --pretty=format:%H | cut -c -9`
+          echo "tag=$TAG"  >> $GITHUB_OUTPUT
+
     docker-build-only:
       name: Building Docker Image
       runs-on: ubuntu-latest
@@ -48,7 +50,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: false
-          tags: mohamedhani/user-java:${{ needs.env-tag.outputs.tag }}
+          tags: mohamedhani/user-java:${{ needs.env-tag.outputs.imageTag }}
         
 
     docker-build:
