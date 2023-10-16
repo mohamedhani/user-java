@@ -1,5 +1,5 @@
-name: packaging
-run-name: ${{ github.actor }}
+name: Build Docker Image
+run-name: Build Docker Image for ${{ github.actor }}
 on:
   push:
     branches:
@@ -21,7 +21,7 @@ jobs:
       - name: Set ENV Tag
         id: env-tag
         run: |
-          echo "tag=${git log -1 --pretty=format:%H | cut -c -9}"  >> "$GITHUB_OUTPUT"
+          echo "tag=`git log -1 --pretty=format:%H | cut -c -9`"  >> "$GITHUB_OUTPUT"
     docker-build-only:
       name: Building Docker Image
       runs-on: ubuntu-latest
