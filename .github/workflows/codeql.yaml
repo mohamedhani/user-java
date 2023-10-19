@@ -1,5 +1,5 @@
 name: Static Testing
-run-name: CodeQL for ${{ github.actor }}
+run-name: Code Anlysis
 on:
   push:
     branches:
