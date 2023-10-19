@@ -21,7 +21,7 @@ jobs:
     - name: Setup JDK
       uses: actions/setup-java@v3
       with:
-        distribution: 'corretto' # See 'Supported distributions' for available options
+        distribution: 'corretto' 
         java-version: '16'
 
     - uses: actions/cache@v3
