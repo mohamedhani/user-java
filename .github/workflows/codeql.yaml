@@ -8,10 +8,13 @@ on:
   pull_request:
     branches:
     - master
+    - develop
     types: 
       - opened
       - synchronize
       - reopened
+  schedule: 
+  - cron: "0 5 * * SUN"
 jobs:
   sonarqube-test:
     name:  SonarQube Test
